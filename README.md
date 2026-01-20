@@ -4,26 +4,76 @@ A professional web-based interface for an AI-Ready Swing Trading Backtesting Sys
 
 ![Dashboard Preview](https://img.shields.io/badge/Status-Frontend_Ready-brightgreen) ![React](https://img.shields.io/badge/React-18.3-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![Tailwind](https://img.shields.io/badge/Tailwind-3.4-blue)
 
-## 🎯 Features
+## 🎯 Current Frontend Capabilities
 
-### Dashboard Components
-- **Metrics Overview** - Key performance indicators (Total Return, Win Rate, Sharpe Ratio, Max Drawdown)
-- **Equity Curve Chart** - Interactive visualization of portfolio value over time
-- **Trade History Table** - Detailed trade log with entry/exit prices, P&L, and signal types
-- **Strategy Configuration Panel** - Real-time parameter adjustment for backtesting
-- **Phase Indicator** - Visual pipeline showing backtest execution stages
+### ✅ Implemented Features
 
-### Strategy Configuration
-- **Moving Averages** - Configurable short (5-30) and long (20-200) MA periods
-- **RSI Settings** - Adjustable period (7-21), oversold (15-40), and overbought (60-85) thresholds
-- **Risk Management** - Stop loss (1-10%) and take profit (3-20%) parameters
-- **AI Decision Support** - Toggle AI assistance with confidence threshold (50-95%)
+#### Dashboard Overview
+- **Header Navigation** - Professional trading terminal header with branding
+- **Responsive Layout** - Optimized for desktop and tablet viewing
 
-### Design
+#### Performance Metrics Display
+- **Total Return** - Portfolio performance percentage with trend indicators
+- **Win Rate** - Trade success rate visualization
+- **Sharpe Ratio** - Risk-adjusted return metric
+- **Max Drawdown** - Largest peak-to-trough decline display
+
+#### Equity Curve Visualization
+- **Interactive Area Chart** - Time-series portfolio value using Recharts
+- **Reference Line** - Initial equity baseline indicator
+- **SEK Formatting** - Swedish locale currency display (sv-SE)
+- **Responsive Tooltips** - Hover details with formatted dates/values
+
+#### Trade History Table
+- **Scrollable Trade Log** - Paginated list of historical trades
+- **Trade Details** - Entry/exit prices, P&L, quantities
+- **Signal Badges** - Visual indicators (MA_CROSS, RSI, AI_SIGNAL, COMBINED)
+- **AI Confidence Display** - Percentage confidence for AI-generated signals
+- **Profit/Loss Coloring** - Green/red visual indicators
+
+#### Strategy Configuration Panel
+- **Moving Average Settings**
+  - Short MA Period (5-30, step: 1)
+  - Long MA Period (20-200, step: 5)
+- **RSI Configuration**
+  - RSI Period (7-21)
+  - Oversold Threshold (15-40)
+  - Overbought Threshold (60-85)
+- **Risk Management**
+  - Stop Loss (1-10%)
+  - Take Profit (3-20%)
+- **AI Decision Support Toggle**
+  - Enable/disable AI assistance
+  - Confidence Threshold slider (50-95%)
+
+#### Phase Indicator Pipeline
+- **Visual Progress Tracker** - Multi-step backtest execution stages
+- **Completion Indicators** - Checkmarks for completed phases
+- **Current Phase Highlight** - Active step visualization
+
+#### Stock Selector Display
+- **Stock Information Card** - Symbol, name, current price
+- **Price Change Indicators** - Up/down arrows with percentage
+- **Market Data** - Volume, 52-week high/low (UI ready)
+
+### ⚠️ Current Limitations (Frontend-Only)
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Run Backtest | UI Only | Button triggers mock simulation |
+| Live Data | Mock | Uses static sample data |
+| Trade Execution | Not Implemented | Requires backend |
+| Data Persistence | None | No database connected |
+| User Authentication | Not Implemented | Requires backend |
+| Real-time Updates | Not Implemented | Requires WebSocket/API |
+
+### 🎨 Design Features
 - Professional dark trading terminal aesthetic
-- Color-coded profit/loss indicators
+- Color-coded profit/loss indicators (green/red)
 - Responsive layout for desktop and tablet
 - Swedish locale formatting (SEK currency, sv-SE dates)
+- Custom trading-themed UI components
+- Smooth animations and transitions
 
 ## 🛠 Tech Stack
 
@@ -34,6 +84,7 @@ A professional web-based interface for an AI-Ready Swing Trading Backtesting Sys
 | Charts | Recharts |
 | Build | Vite |
 | Icons | Lucide React |
+| State | React useState/useCallback |
 
 ## 📁 Project Structure
 
