@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { EquityChart } from '@/components/dashboard/EquityChart';
+import { StockPerformanceChart } from '@/components/dashboard/StockPerformanceChart';
 import { TradeTable } from '@/components/dashboard/TradeTable';
 import { StrategyPanel } from '@/components/dashboard/StrategyPanel';
 import { PhaseIndicator } from '@/components/dashboard/PhaseIndicator';
@@ -169,7 +170,10 @@ const Index = () => {
             {loading ? (
               <Skeleton className="h-80 w-full" />
             ) : (
-              <EquityChart data={equityCurve} />
+              <div className="grid gap-4 md:grid-cols-2">
+                <EquityChart data={equityCurve} />
+                <StockPerformanceChart data={yahooData?.ohlcv || []} symbol={selectedSymbol} />
+              </div>
             )}
             <TradeTable trades={mockTrades} />
           </div>
