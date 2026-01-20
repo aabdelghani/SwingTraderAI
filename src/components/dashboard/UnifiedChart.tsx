@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { 
   ComposedChart,
   Line,
@@ -18,12 +19,38 @@ import {
 import { OHLCVData } from '@/hooks/useYahooFinance';
 import { EquityCurvePoint } from '@/types/trading';
 import { Activity } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+type TimeRange = '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '2y' | '5y' | 'max';
+type TimeInterval = '1m' | '5m' | '15m' | '30m' | '1h' | '1d' | '1wk' | '1mo';
 
 interface UnifiedChartProps {
   ohlcv: OHLCVData[];
   equityCurve: EquityCurvePoint[];
   symbol: string;
+  selectedRange: TimeRange;
+  selectedInterval: TimeInterval;
+  onRangeChange: (range: TimeRange) => void;
+  onIntervalChange: (interval: TimeInterval) => void;
 }
+
+interface TimeRangeOption {
+  value: TimeRange;
+  label: string;
+  defaultInterval: TimeInterval;
+}
+
+const TIME_RANGES: TimeRangeOption[] = [
+  { value: '1d', label: '1D', defaultInterval: '5m' },
+  { value: '5d', label: '5D', defaultInterval: '15m' },
+  { value: '1mo', label: '1M', defaultInterval: '1h' },
+  { value: '3mo', label: '3M', defaultInterval: '1d' },
+  { value: '6mo', label: '6M', defaultInterval: '1d' },
+  { value: '1y', label: '1Y', defaultInterval: '1d' },
+  { value: '2y', label: '2Y', defaultInterval: '1wk' },
+  { value: '5y', label: '5Y', defaultInterval: '1wk' },
+  { value: 'max', label: 'MAX', defaultInterval: '1mo' },
+];
 
 interface ChartDataPoint {
   date: string;
@@ -130,10 +157,26 @@ const INDICATORS: IndicatorConfig[] = [
   { key: 'macd', label: 'MACD', color: 'hsl(var(--chart-1))', defaultEnabled: false, group: 'oscillator' },
 ];
 
-export function UnifiedChart({ ohlcv, equityCurve, symbol }: UnifiedChartProps) {
+export function UnifiedChart({ 
+  ohlcv, 
+  equityCurve, 
+  symbol, 
+  selectedRange, 
+  selectedInterval,
+  onRangeChange,
+  onIntervalChange,
+}: UnifiedChartProps) {
   const [enabledIndicators, setEnabledIndicators] = useState<Set<IndicatorKey>>(
     new Set(INDICATORS.filter(i => i.defaultEnabled).map(i => i.key))
   );
+
+  const handleRangeChange = (range: TimeRange) => {
+    const rangeOption = TIME_RANGES.find(r => r.value === range);
+    if (rangeOption) {
+      onRangeChange(range);
+      onIntervalChange(rangeOption.defaultInterval);
+    }
+  };
 
   const toggleIndicator = (key: IndicatorKey) => {
     setEnabledIndicators(prev => {
@@ -180,13 +223,9 @@ export function UnifiedChart({ ohlcv, equityCurve, symbol }: UnifiedChartProps) 
   const signal = calculateEMA(macdValues, 9);
   const signalPadded: (number | null)[] = new Array(macd.length - macdValues.length).fill(null).concat(signal);
 
-  // Build chart data - use last 90 days
-  const dataLength = Math.min(ohlcv.length, 90);
-  const startIdx = ohlcv.length - dataLength;
-  
-  const chartData: ChartDataPoint[] = ohlcv.slice(-dataLength).map((d, i) => {
-    const idx = startIdx + i;
-    const equityPoint = equityCurve[idx] || equityCurve[equityCurve.length - 1];
+  // Use all data (already filtered by range from API)
+  const chartData: ChartDataPoint[] = ohlcv.map((d, i) => {
+    const equityPoint = equityCurve[i] || equityCurve[equityCurve.length - 1];
     return {
       date: d.date,
       close: d.close,
@@ -195,13 +234,13 @@ export function UnifiedChart({ ohlcv, equityCurve, symbol }: UnifiedChartProps) 
       low: d.low,
       volume: d.volume,
       equity: equityPoint?.equity || 100000,
-      sma20: sma20[idx],
-      sma50: sma50[idx],
-      ema12: ema12[idx],
-      ema26: ema26[idx],
-      rsi: rsi[idx],
-      macd: macd[idx],
-      signal: signalPadded[idx],
+      sma20: sma20[i],
+      sma50: sma50[i],
+      ema12: ema12[i],
+      ema26: ema26[i],
+      rsi: rsi[i],
+      macd: macd[i],
+      signal: signalPadded[i],
       isGreen: d.close >= d.open,
     };
   });
@@ -219,6 +258,18 @@ export function UnifiedChart({ ohlcv, equityCurve, symbol }: UnifiedChartProps) 
   const maxPrice = Math.max(...prices);
   const pricePadding = (maxPrice - minPrice) * 0.1;
 
+  // Format date based on interval
+  const formatDate = (value: string) => {
+    const date = new Date(value);
+    if (['1m', '5m', '15m', '30m', '1h'].includes(selectedInterval)) {
+      return date.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    }
+    if (['1d', '5d', '1mo'].includes(selectedRange)) {
+      return date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+    }
+    return date.toLocaleDateString('sv-SE', { month: 'short', year: '2-digit' });
+  };
+
   const showOscillator = enabledIndicators.has('rsi') || enabledIndicators.has('macd');
   const showVolume = enabledIndicators.has('volume');
 
@@ -228,10 +279,32 @@ export function UnifiedChart({ ohlcv, equityCurve, symbol }: UnifiedChartProps) 
     <Card className="bg-card border-border">
       <CardHeader className="pb-2">
         <div className="flex flex-col gap-3">
-          <CardTitle className="text-base font-medium flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            {symbol} Unified Chart
-          </CardTitle>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              {symbol}
+            </CardTitle>
+            
+            {/* Time Range Selector */}
+            <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+              {TIME_RANGES.map((range) => (
+                <Button
+                  key={range.value}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRangeChange(range.value)}
+                  className={cn(
+                    "h-7 px-2.5 text-xs font-medium transition-colors",
+                    selectedRange === range.value 
+                      ? "bg-background text-foreground shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {range.label}
+                </Button>
+              ))}
+            </div>
+          </div>
           
           {/* Indicator Toggles */}
           <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -280,7 +353,7 @@ export function UnifiedChart({ ohlcv, equityCurve, symbol }: UnifiedChartProps) 
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  tickFormatter={(value) => new Date(value).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
+                  tickFormatter={formatDate}
                   interval="preserveStartEnd"
                   minTickGap={60}
                 />
