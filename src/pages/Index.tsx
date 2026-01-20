@@ -6,6 +6,7 @@ import { TradeTable } from '@/components/dashboard/TradeTable';
 import { StrategyPanel } from '@/components/dashboard/StrategyPanel';
 import { PhaseIndicator } from '@/components/dashboard/PhaseIndicator';
 import { StockSelector } from '@/components/dashboard/StockSelector';
+import { TickerSelector } from '@/components/dashboard/TickerSelector';
 import { mockTrades, mockMetrics, mockEquityCurve, defaultStrategyConfig } from '@/data/mockData';
 import { StrategyConfig, Phase } from '@/types/trading';
 import { useYahooFinance } from '@/hooks/useYahooFinance';
@@ -25,7 +26,7 @@ const Index = () => {
   const [strategyConfig, setStrategyConfig] = useState<StrategyConfig>(defaultStrategyConfig);
   const [currentPhase] = useState<Phase>('rule-based');
   const [isRunning, setIsRunning] = useState(false);
-  const [selectedSymbol] = useState('SAAB-B.ST');
+  const [selectedSymbol, setSelectedSymbol] = useState('SAAB-B.ST');
 
   // Fetch real Yahoo Finance data
   const { data: yahooData, loading, error, refetch } = useYahooFinance({
@@ -64,33 +65,21 @@ const Index = () => {
         <PhaseIndicator currentPhase={currentPhase} />
 
         {/* Data Source Indicator */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <RefreshCw className="h-3 w-3 animate-spin" />
-                Loading Yahoo Finance data...
-              </span>
-            ) : error ? (
-              <span className="text-destructive">
-                ⚠️ Error loading data: {error} (using mock data)
-              </span>
-            ) : yahooData ? (
-              <span className="text-profit">
-                ✓ Live data from Yahoo Finance • {yahooData.meta?.dataPoints} data points • Updated: {new Date(yahooData.meta?.fetchedAt || '').toLocaleString('sv-SE')}
-              </span>
-            ) : null}
-          </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={refetch}
-            disabled={loading}
-            className="text-xs"
-          >
-            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              Loading Yahoo Finance data...
+            </span>
+          ) : error ? (
+            <span className="text-destructive">
+              ⚠️ Error loading data: {error} (using mock data)
+            </span>
+          ) : yahooData ? (
+            <span className="text-profit">
+              ✓ Live data from Yahoo Finance • {yahooData.meta?.dataPoints} data points • Updated: {new Date(yahooData.meta?.fetchedAt || '').toLocaleString('sv-SE')}
+            </span>
+          ) : null}
         </div>
 
         {/* Stock Selector */}
@@ -155,6 +144,28 @@ const Index = () => {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Chart & Table Column */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Ticker Selector above chart */}
+            <div className="flex items-center justify-between">
+              <TickerSelector
+                selectedSymbol={selectedSymbol}
+                onSymbolChange={setSelectedSymbol}
+                currentPrice={stockQuote?.price}
+                priceChange={stockQuote?.change}
+                changePercent={stockQuote?.changePercent}
+                loading={loading}
+              />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={refetch}
+                disabled={loading}
+                className="text-xs"
+              >
+                <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+            
             {loading ? (
               <Skeleton className="h-80 w-full" />
             ) : (
