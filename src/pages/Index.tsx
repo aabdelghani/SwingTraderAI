@@ -27,12 +27,14 @@ const Index = () => {
   const [currentPhase] = useState<Phase>('rule-based');
   const [isRunning, setIsRunning] = useState(false);
   const [selectedSymbol, setSelectedSymbol] = useState('SAAB-B.ST');
+  const [selectedRange, setSelectedRange] = useState<'1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '2y' | '5y' | 'max'>('1y');
+  const [selectedInterval, setSelectedInterval] = useState<'1m' | '5m' | '15m' | '30m' | '1h' | '1d' | '1wk' | '1mo'>('1d');
 
   // Fetch real Yahoo Finance data
   const { data: yahooData, loading, error, refetch } = useYahooFinance({
     symbol: selectedSymbol,
-    range: '1y',
-    interval: '1d',
+    range: selectedRange,
+    interval: selectedInterval,
   });
 
   const handleRunBacktest = () => {
@@ -172,7 +174,11 @@ const Index = () => {
               <UnifiedChart 
                 ohlcv={yahooData?.ohlcv || []} 
                 equityCurve={equityCurve}
-                symbol={selectedSymbol} 
+                symbol={selectedSymbol}
+                selectedRange={selectedRange}
+                selectedInterval={selectedInterval}
+                onRangeChange={setSelectedRange}
+                onIntervalChange={setSelectedInterval}
               />
             )}
             <TradeTable trades={mockTrades} />
