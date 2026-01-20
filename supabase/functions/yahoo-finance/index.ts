@@ -22,11 +22,18 @@ function generateStockData(symbol: string, range: string) {
   
   const days = rangeDays[range] || 252;
   
-  // Base prices for stocks/funds (realistic ranges)
+  // Base prices for Swedish stocks (realistic ranges)
   const stockPrices: Record<string, { base: number; volatility: number; trend: number }> = {
     'SAAB-B.ST': { base: 850, volatility: 0.018, trend: 0.0004 },
-    '0P0001B1CC.F': { base: 145, volatility: 0.025, trend: 0.0003 }, // Evli Silver and Gold B
-    '0P0001OYEE.F': { base: 95, volatility: 0.03, trend: 0.0002 }, // AuAg Silver Bullet A
+    'VOLV-B.ST': { base: 280, volatility: 0.015, trend: 0.0002 },
+    'ERIC-B.ST': { base: 75, volatility: 0.02, trend: 0.0001 },
+    'HM-B.ST': { base: 165, volatility: 0.022, trend: -0.0001 },
+    'SEB-A.ST': { base: 145, volatility: 0.016, trend: 0.0003 },
+    'SWED-A.ST': { base: 210, volatility: 0.017, trend: 0.0002 },
+    'ASSA-B.ST': { base: 310, volatility: 0.014, trend: 0.0003 },
+    'ATCO-A.ST': { base: 185, volatility: 0.016, trend: 0.0004 },
+    'INVE-B.ST': { base: 265, volatility: 0.015, trend: 0.0003 },
+    'SAND.ST': { base: 225, volatility: 0.018, trend: 0.0002 },
   };
   
   const stockInfo = stockPrices[symbol] || { base: 100, volatility: 0.02, trend: 0.0002 };
@@ -149,11 +156,18 @@ serve(async (req) => {
     const currentPrice = ohlcv[ohlcv.length - 1]?.close || 0;
     const previousClose = ohlcv[ohlcv.length - 2]?.close || currentPrice;
 
-    // Stock/Fund names
+    // Stock names
     const stockNames: Record<string, string> = {
       'SAAB-B.ST': 'Saab AB Series B',
-      '0P0001B1CC.F': 'Evli Silver and Gold B',
-      '0P0001OYEE.F': 'AuAg Silver Bullet A',
+      'VOLV-B.ST': 'Volvo AB Series B',
+      'ERIC-B.ST': 'Ericsson AB Series B',
+      'HM-B.ST': 'H&M AB Series B',
+      'SEB-A.ST': 'SEB AB Series A',
+      'SWED-A.ST': 'Swedbank AB Series A',
+      'ASSA-B.ST': 'Assa Abloy AB Series B',
+      'ATCO-A.ST': 'Atlas Copco AB Series A',
+      'INVE-B.ST': 'Investor AB Series B',
+      'SAND.ST': 'Sandvik AB',
     };
 
     return new Response(JSON.stringify({
