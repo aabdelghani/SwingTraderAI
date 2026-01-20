@@ -9,15 +9,8 @@ interface Ticker {
 
 const SWEDISH_TICKERS: Ticker[] = [
   { symbol: 'SAAB-B.ST', name: 'Saab AB' },
-  { symbol: 'VOLV-B.ST', name: 'Volvo AB' },
-  { symbol: 'ERIC-B.ST', name: 'Ericsson AB' },
-  { symbol: 'HM-B.ST', name: 'H&M AB' },
-  { symbol: 'ABB.ST', name: 'ABB Ltd' },
-  { symbol: 'ATCO-A.ST', name: 'Atlas Copco' },
-  { symbol: 'SEB-A.ST', name: 'SEB AB' },
-  { symbol: 'SWED-A.ST', name: 'Swedbank AB' },
-  { symbol: 'INVE-B.ST', name: 'Investor AB' },
-  { symbol: 'SAND.ST', name: 'Sandvik AB' },
+  { symbol: '0P0001B1CC.F', name: 'Evli Silver and Gold B' },
+  { symbol: '0P0001OYEE.F', name: 'AuAg Silver Bullet A' },
 ];
 
 interface TickerSelectorProps {
