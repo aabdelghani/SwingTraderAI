@@ -155,9 +155,100 @@ interface EquityCurvePoint {
 The following modules need to be implemented in your Python backend:
 
 ### 1. Data Pipeline
-- [ ] Fetch OHLCV data from Swedish market APIs (Avanza, Nordnet, Yahoo Finance)
+- [ ] Fetch OHLCV data from Swedish market APIs
 - [ ] Data validation and cleaning
 - [ ] Database storage (PostgreSQL/SQLite)
+
+#### Swedish Market Data Sources
+
+| Source | API Type | Coverage | Notes |
+|--------|----------|----------|-------|
+| **Yahoo Finance** | REST (yfinance) | Global + OMX Stockholm | Free, suffix `.ST` for Swedish stocks (e.g., `SAAB-B.ST`) |
+| **Avanza** | Unofficial API | OMX Stockholm, First North | No official API; scraping/reverse-engineering required |
+| **Nordnet** | Unofficial API | Nordic markets | Similar to Avanza; unofficial endpoints |
+| **Nasdaq Nordic** | REST | OMX Stockholm official | Official exchange data |
+| **Alpha Vantage** | REST | Global markets | Free tier available, requires API key |
+
+#### Yahoo Finance Implementation (Recommended)
+
+```python
+import yfinance as yf
+from datetime import datetime, timedelta
+
+def fetch_swedish_stock(symbol: str, period: str = "1y") -> pd.DataFrame:
+    """
+    Fetch OHLCV data for Swedish stocks.
+    
+    Args:
+        symbol: Stock symbol with .ST suffix (e.g., 'SAAB-B.ST', 'VOLV-B.ST')
+        period: Data period ('1mo', '3mo', '6mo', '1y', '2y', '5y', 'max')
+    
+    Returns:
+        DataFrame with columns: Open, High, Low, Close, Volume, Adj Close
+    """
+    ticker = yf.Ticker(symbol)
+    df = ticker.history(period=period)
+    return df
+
+# Example usage
+saab_data = fetch_swedish_stock("SAAB-B.ST", period="1y")
+volvo_data = fetch_swedish_stock("VOLV-B.ST", period="2y")
+
+# Popular Swedish stocks
+SWEDISH_STOCKS = [
+    "SAAB-B.ST",    # Saab
+    "VOLV-B.ST",    # Volvo
+    "ERIC-B.ST",    # Ericsson
+    "HM-B.ST",      # H&M
+    "SEB-A.ST",     # SEB
+    "SWED-A.ST",    # Swedbank
+    "ASSA-B.ST",    # Assa Abloy
+    "ATCO-A.ST",    # Atlas Copco
+    "INVE-B.ST",    # Investor
+    "SAND.ST",      # Sandvik
+]
+```
+
+#### Data Validation
+
+```python
+def validate_ohlcv(df: pd.DataFrame) -> pd.DataFrame:
+    """Validate and clean OHLCV data."""
+    # Remove rows with missing values
+    df = df.dropna()
+    
+    # Ensure OHLC consistency (High >= Low, etc.)
+    df = df[df['High'] >= df['Low']]
+    df = df[df['High'] >= df['Open']]
+    df = df[df['High'] >= df['Close']]
+    df = df[df['Low'] <= df['Open']]
+    df = df[df['Low'] <= df['Close']]
+    
+    # Remove zero/negative volumes
+    df = df[df['Volume'] > 0]
+    
+    return df
+```
+
+#### Database Schema
+
+```sql
+CREATE TABLE ohlcv_data (
+    id SERIAL PRIMARY KEY,
+    symbol VARCHAR(20) NOT NULL,
+    date DATE NOT NULL,
+    open DECIMAL(12, 4) NOT NULL,
+    high DECIMAL(12, 4) NOT NULL,
+    low DECIMAL(12, 4) NOT NULL,
+    close DECIMAL(12, 4) NOT NULL,
+    volume BIGINT NOT NULL,
+    adj_close DECIMAL(12, 4),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(symbol, date)
+);
+
+CREATE INDEX idx_ohlcv_symbol_date ON ohlcv_data(symbol, date);
+```
 
 ### 2. Technical Indicators
 - [ ] Moving Average calculations (SMA, EMA)
