@@ -18,7 +18,7 @@ import {
 } from 'recharts';
 import { OHLCVData } from '@/hooks/useYahooFinance';
 import { EquityCurvePoint } from '@/types/trading';
-import { Activity } from 'lucide-react';
+import { Activity, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type TimeRange = '1d' | '5d' | '1mo' | '3mo' | '6mo' | '1y' | '2y' | '5y' | 'max';
@@ -275,6 +275,9 @@ export function UnifiedChart({
 
   const latestRSI = chartData[chartData.length - 1]?.rsi;
 
+  // Generate Yahoo Finance chart URL
+  const yahooChartUrl = `https://finance.yahoo.com/chart/${encodeURIComponent(symbol)}`;
+
   return (
     <Card className="bg-card border-border">
       <CardHeader className="pb-2">
@@ -285,24 +288,37 @@ export function UnifiedChart({
               {symbol}
             </CardTitle>
             
-            {/* Time Range Selector */}
-            <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
-              {TIME_RANGES.map((range) => (
-                <Button
-                  key={range.value}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRangeChange(range.value)}
-                  className={cn(
-                    "h-7 px-2.5 text-xs font-medium transition-colors",
-                    selectedRange === range.value 
-                      ? "bg-background text-foreground shadow-sm" 
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {range.label}
-                </Button>
-              ))}
+            <div className="flex items-center gap-2">
+              {/* Time Range Selector */}
+              <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+                {TIME_RANGES.map((range) => (
+                  <Button
+                    key={range.value}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRangeChange(range.value)}
+                    className={cn(
+                      "h-7 px-2.5 text-xs font-medium transition-colors",
+                      selectedRange === range.value 
+                        ? "bg-background text-foreground shadow-sm" 
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {range.label}
+                  </Button>
+                ))}
+              </div>
+              
+              {/* Advanced Chart Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-3 text-xs gap-1.5"
+                onClick={() => window.open(yahooChartUrl, '_blank')}
+              >
+                <ExternalLink className="h-3 w-3" />
+                Advanced Chart
+              </Button>
             </div>
           </div>
           
