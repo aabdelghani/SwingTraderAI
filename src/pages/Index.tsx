@@ -3,6 +3,9 @@ import { Header } from '@/components/layout/Header';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { EquityChart } from '@/components/dashboard/EquityChart';
 import { StockPerformanceChart } from '@/components/dashboard/StockPerformanceChart';
+import { CandlestickChart } from '@/components/dashboard/CandlestickChart';
+import { VolumeChart } from '@/components/dashboard/VolumeChart';
+import { TechnicalIndicatorChart } from '@/components/dashboard/TechnicalIndicatorChart';
 import { TradeTable } from '@/components/dashboard/TradeTable';
 import { StrategyPanel } from '@/components/dashboard/StrategyPanel';
 import { PhaseIndicator } from '@/components/dashboard/PhaseIndicator';
@@ -170,9 +173,21 @@ const Index = () => {
             {loading ? (
               <Skeleton className="h-80 w-full" />
             ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                <EquityChart data={equityCurve} />
-                <StockPerformanceChart data={yahooData?.ohlcv || []} symbol={selectedSymbol} />
+              <div className="space-y-4">
+                {/* Primary Charts Row */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <EquityChart data={equityCurve} />
+                  <StockPerformanceChart data={yahooData?.ohlcv || []} symbol={selectedSymbol} />
+                </div>
+                
+                {/* Candlestick & Volume Row */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <CandlestickChart data={yahooData?.ohlcv || []} symbol={selectedSymbol} />
+                  <TechnicalIndicatorChart data={yahooData?.ohlcv || []} symbol={selectedSymbol} />
+                </div>
+                
+                {/* Volume Chart */}
+                <VolumeChart data={yahooData?.ohlcv || []} symbol={selectedSymbol} />
               </div>
             )}
             <TradeTable trades={mockTrades} />
